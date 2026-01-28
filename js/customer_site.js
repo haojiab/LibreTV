@@ -39,15 +39,11 @@ const CUSTOMER_SITES = {
         api: 'https://www.mdzyapi.com/api.php/provide/vod',
         name: '魔都资源',
     },
-    "360": {
-        api: 'https://360zy.com/api.php/provide/vod',
-        name: '360资源',
-    },
-    dyttzyapi :{
+    dyttzyapi: {
         api:'http://caiji.dyttzyapi.com/api.php/provide/vod' ,
         name:'电影天堂'
     },
-    ryzy:{
+    ryzy: {
         api: "https://cj.rycjapi.com/api.php/provide/vod",
         name: "如意资源"
     },
@@ -90,10 +86,6 @@ const CUSTOMER_SITES = {
     jyzy: {
         api: 'https://jyzyapi.com/provide/vod',
         name: '鲸鱼资源',
-    },
-    zy1080: {
-        api: 'https://api.1080zyku.com/inc/api_mac10.php',
-        name: '1080资源',
     },
     adzy: {
         api: 'https://lovedan.net/api.php/provide/vod',
