@@ -494,6 +494,10 @@ body {
     color: #ff6b8b;
 }
 
+.api-group-title.pure {
+    color: #4ade80;
+}
+
 /* 过滤器禁用样式 - 改进版本 */
 .filter-disabled {
     position: relative;

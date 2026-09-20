@@ -1,5 +1,9 @@
 // 全局变量
-let selectedAPIs = JSON.parse(localStorage.getItem('selectedAPIs') || 'null') || Object.keys(API_SITES); // 默认选中全部资源
+// 默认只勾选"纯净"类数据源（pure: true 的源）
+function getPureSiteKeys() {
+    return Object.keys(API_SITES).filter(k => API_SITES[k] && API_SITES[k].pure);
+}
+let selectedAPIs = JSON.parse(localStorage.getItem('selectedAPIs') || 'null') || getPureSiteKeys(); // 默认选中纯净资源
 let customAPIs = JSON.parse(localStorage.getItem('customAPIs') || '[]'); // 存储自定义API列表
 
 // 添加当前播放的集数索引
@@ -16,8 +20,8 @@ document.addEventListener('DOMContentLoaded', function () {
     // 设置默认API选择（如果是第一次加载）
     // 注意：必须在渲染复选框之前设置默认值，否则勾选状态不会生效
     if (!localStorage.getItem('hasInitializedDefaults')) {
-        // 默认选中全部数据源
-        selectedAPIs = Object.keys(API_SITES);
+        // 默认只选中"纯净"数据源
+        selectedAPIs = getPureSiteKeys();
         localStorage.setItem('selectedAPIs', JSON.stringify(selectedAPIs));
 
         // 默认选中过滤开关
@@ -29,6 +33,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
         // 标记已初始化默认值
         localStorage.setItem('hasInitializedDefaults', 'true');
+    }
+
+    // 一次性迁移：老用户默认全选，改为只选纯净源（避免继续用带广告的源）
+    if (!localStorage.getItem('pureMigrationDone_v2')) {
+        selectedAPIs = getPureSiteKeys();
+        localStorage.setItem('selectedAPIs', JSON.stringify(selectedAPIs));
+        localStorage.setItem('pureMigrationDone_v2', 'true');
     }
 
     // 初始化API复选框
@@ -72,7 +83,16 @@ function initAPICheckboxes() {
     const container = document.getElementById('apiCheckboxes');
     container.innerHTML = '';
 
-    // 添加普通API组标题
+    // ===== 纯净资源组（无切片广告，默认勾选） =====
+    const pureDiv = document.createElement('div');
+    pureDiv.id = 'purediv';
+    pureDiv.className = 'grid grid-cols-2 gap-2';
+    const pureTitle = document.createElement('div');
+    pureTitle.className = 'api-group-title pure';
+    pureTitle.innerHTML = '纯净资源 <span class="text-green-500 text-xs">(无广告)</span>';
+    pureDiv.appendChild(pureTitle);
+
+    // ===== 普通资源组 =====
     const normaldiv = document.createElement('div');
     normaldiv.id = 'normaldiv';
     normaldiv.className = 'grid grid-cols-2 gap-2';
@@ -81,13 +101,12 @@ function initAPICheckboxes() {
     normalTitle.textContent = '普通资源';
     normaldiv.appendChild(normalTitle);
 
-    // 创建普通API源的复选框
+    // 遍历所有API源，按 pure / normal 分组
     Object.keys(API_SITES).forEach(apiKey => {
         const api = API_SITES[apiKey];
         if (api.adult) return; // 跳过成人内容API，稍后添加
 
         const checked = selectedAPIs.includes(apiKey);
-
         const checkbox = document.createElement('div');
         checkbox.className = 'flex items-center';
         checkbox.innerHTML = `
@@ -97,14 +116,19 @@ function initAPICheckboxes() {
                    data-api="${apiKey}">
             <label for="api_${apiKey}" class="ml-1 text-xs text-gray-400 truncate">${api.name}</label>
         `;
-        normaldiv.appendChild(checkbox);
-
-        // 添加事件监听器
         checkbox.querySelector('input').addEventListener('change', function () {
             updateSelectedAPIs();
             checkAdultAPIsSelected();
         });
+
+        if (api.pure) {
+            pureDiv.appendChild(checkbox);
+        } else {
+            normaldiv.appendChild(checkbox);
+        }
     });
+
+    container.appendChild(pureDiv);
     container.appendChild(normaldiv);
 
     // 添加成人API列表

@@ -1,4 +1,26 @@
 const CUSTOMER_SITES = {
+    // ===== 纯净资源（默认勾选，无切片广告） =====
+    lzzy: {
+        api: 'https://cj.lziapi.com/api.php/provide/vod',
+        name: '量子资源',
+        pure: true
+    },
+    baidu: {
+        api: 'https://api.apibdzy.com/api.php/provide/vod',
+        name: '百度云资源',
+        pure: true
+    },
+    q360: {
+        api: 'https://360zy.com/api.php/provide/vod',
+        name: '360资源',
+        pure: true
+    },
+    wujin: {
+        api: 'https://api.wujinapi.com/api.php/provide/vod',
+        name: '无尽资源',
+        pure: true
+    },
+    // ===== 其他资源（可能含广告，默认不勾选） =====
     xl: {
         api: 'https://api.xinlangapi.com/xinlangapi.php/provide/vod',
         name: '新浪HTTPS',
@@ -15,17 +37,9 @@ const CUSTOMER_SITES = {
         api: 'https://api.zuidapi.com/api.php/provide/vod',
         name: '最大资源',
     },
-    baidu: {
-        api: 'https://api.apibdzy.com/api.php/provide/vod',
-        name: '百度云资源',
-    },
     bf: {
         api: 'https://bfzyapi.com/api.php/provide/vod',
         name: '暴风资源',
-    },
-    wujin: {
-        api: 'https://api.wujinapi.com/api.php/provide/vod',
-        name: '无尽资源',
     },
     tyyszy: {
         api: 'https://tyyszy.com/api.php/provide/vod',
@@ -75,9 +89,9 @@ const CUSTOMER_SITES = {
         api: 'http://api.xinlangapi.com/xinlangapi.php/provide/vod',
         name: '新浪资源',
     },
-    lzzy: {
-        api: 'https://cj.lziapi.com/api.php/provide/vod',
-        name: '乐子资源',
+    lzhttp: {
+        api: 'http://cj.lziapi.com/api.php/provide/vod',
+        name: '乐子HTTP',
     },
     htzy: {
         api: 'https://hhzyapi.com/api.php/provide/vod',
@@ -138,10 +152,6 @@ const CUSTOMER_SITES = {
     json1080: {
         api: 'https://api.1080zyku.com/inc/apijson.php',
         name: '1080JSON',
-    },
-    lzhttp: {
-        api: 'http://cj.lziapi.com/api.php/provide/vod',
-        name: '乐子HTTP',
     }
 };
 
