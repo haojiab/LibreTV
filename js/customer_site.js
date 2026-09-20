@@ -50,6 +50,11 @@ const CUSTOMER_SITES = {
         name: '极速资源',
         pure: true
     },
+    subo: {
+        api: 'https://subocaiji.com/api.php/provide/vod',
+        name: '速博资源',
+        pure: true
+    },
     // ===== 其他资源（可能含广告，默认不勾选） =====
     xl: {
         api: 'https://api.xinlangapi.com/xinlangapi.php/provide/vod',
