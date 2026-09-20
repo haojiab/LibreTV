@@ -109,13 +109,8 @@
                 <div id="addCustomApiForm" class="hidden mt-2 p-2 bg-[#191919] rounded-lg">
                     <input type="text" id="customApiName" placeholder="API名称" class="w-full bg-[#222] border border-[#333] text-white px-2 py-1 rounded mb-2" autocomplete="off">
                     <input type="text" id="customApiUrl" placeholder="https://abc.com" class="w-full bg-[#222] border border-[#333] text-white px-2 py-1 rounded mb-2" autocomplete="off">
-                    <!-- 新增 detail 地址输入框 -->
+                    <!-- detail 地址输入框 -->
                     <input type="text" id="customApiDetail" placeholder="detail地址（可选）" class="w-full bg-[#222] border border-[#333] text-white px-2 py-1 rounded mb-2" autocomplete="off">
-                    <!-- 添加成人内容切换 -->
-                    <div class="flex items-center mb-2">
-                        <input type="checkbox" id="customApiIsAdult" class="form-checkbox h-4 w-4 text-pink-500 bg-[#222] border border-[#333]">
-                        <label for="customApiIsAdult" class="ml-2 text-xs text-pink-400">黄色资源站</label>
-                    </div>
                     <div class="flex space-x-2">
                         <button onclick="addCustomApi()" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-xs">添加</button>
                         <button onclick="cancelAddCustomApi()" class="bg-[#444] hover:bg-[#555] text-white px-3 py-1 rounded text-xs">取消</button>
@@ -413,15 +408,15 @@
         // 保存原始 js‑sha256 实现，避免被 password.js 覆盖
         window._jsSha256 = window.sha256;
     </script>
-    <script src="js/config.js"></script>
+    <script src="js/config.js?v=4"></script>
     <script src="js/proxy-auth.js"></script>
-    <script src="js/customer_site.js?v=3"></script>
+    <script src="js/customer_site.js?v=4"></script>
     <script src="js/ui.js"></script>
     <script src="js/api.js"></script>
-    <script src="js/douban.js?v=3"></script>
+    <script src="js/douban.js?v=4"></script>
     <script src="js/password.js"></script>
     <script src="js/search.js"></script>
-    <script src="js/app.js?v=3"></script>
+    <script src="js/app.js?v=4"></script>
 
     <!-- PWA 注册 -->
     <script src="js/pwa-register.js"></script>
@@ -437,7 +432,7 @@
     </script>
 
     <!-- 版本检测脚本 -->
-    <script src="js/version-check.js?v=3"></script>
+    <script src="js/version-check.js?v=4"></script>
 
     <!-- 添加弹窗和URL搜索参数处理脚本 -->
     <script src="js/index-page.js"></script>
