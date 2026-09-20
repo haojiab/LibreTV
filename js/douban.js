@@ -580,9 +580,10 @@ function renderDoubanCards(data, container) {
             const originalCoverUrl = item.cover;
 
             // 2. 也准备代理URL作为备选（附带 auth 鉴权参数，避免代理返回 401）
+            // v=2 用于绕过 CDN 上旧的损坏缓存（旧代理把二进制图片当 text() 读取导致损坏）
             const _coverAuth = (window.__ENV__ && window.__ENV__.PASSWORD) ? window.__ENV__.PASSWORD : '';
             const proxiedCoverUrl = PROXY_URL + encodeURIComponent(originalCoverUrl) +
-                (_coverAuth ? '?auth=' + encodeURIComponent(_coverAuth) : '');
+                (_coverAuth ? '?auth=' + encodeURIComponent(_coverAuth) + '&v=2' : '?v=2');
             
             // 为不同设备优化卡片布局
             card.innerHTML = `
