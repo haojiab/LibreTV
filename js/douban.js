@@ -1,8 +1,9 @@
 // 豆瓣热门电影电视剧推荐功能
 
 // 豆瓣标签列表 - 与豆瓣 search_tags 接口返回的可用标签保持一致
-let defaultMovieTags = ['热门', '最新', '经典', '豆瓣高分', '冷门佳片', '华语', '欧美', '韩国', '日本', '动作', '喜剧', '爱情', '科幻', '悬疑', '恐怖', '治愈'];
-let defaultTvTags = ['热门', '美剧', '英剧', '韩剧', '日剧', '国产剧', '港剧', '日本动画', '综艺', '纪录片'];
+// 默认把华语/国产剧放最前
+let defaultMovieTags = ['华语', '热门', '最新', '经典', '豆瓣高分', '冷门佳片', '欧美', '韩国', '日本', '动作', '喜剧', '爱情', '科幻', '悬疑', '恐怖', '治愈'];
+let defaultTvTags = ['国产剧', '热门', '美剧', '英剧', '韩剧', '日剧', '港剧', '日本动画', '综艺', '纪录片'];
 
 // 用户标签列表 - 存储用户实际使用的标签（包含保留的系统标签和用户添加的自定义标签）
 let movieTags = [];
@@ -18,11 +19,24 @@ function loadUserTags() {
         const savedMovieTags = localStorage.getItem('userMovieTags');
         const savedTvTags = localStorage.getItem('userTvTags');
 
+        // 一次性迁移：把"华语"/"国产剧"提到最前
+        const reordered = localStorage.getItem('doubanTagsReordered_v1') === '1';
+        function moveToFront(arr, tag) {
+            const i = arr.indexOf(tag);
+            if (i <= 0) return arr;
+            arr.splice(i, 1);
+            arr.unshift(tag);
+            return arr;
+        }
+
         // 如果本地存储中有标签数据，则使用它
         if (savedMovieTags) {
             movieTags = JSON.parse(savedMovieTags);
             if (!migrated) {
                 movieTags = movieTags.filter(t => t !== '日综');
+            }
+            if (!reordered) {
+                movieTags = moveToFront(movieTags, '华语');
             }
         } else {
             // 否则使用默认标签
@@ -31,6 +45,9 @@ function loadUserTags() {
 
         if (savedTvTags) {
             tvTags = JSON.parse(savedTvTags);
+            if (!reordered) {
+                tvTags = moveToFront(tvTags, '国产剧');
+            }
         } else {
             // 否则使用默认标签
             tvTags = [...defaultTvTags];
@@ -38,6 +55,9 @@ function loadUserTags() {
 
         if (!migrated) {
             localStorage.setItem('doubanTagsMigrated_v2', '1');
+        }
+        if (!reordered) {
+            localStorage.setItem('doubanTagsReordered_v1', '1');
             saveUserTags();
         }
     } catch (e) {
@@ -60,7 +80,7 @@ function saveUserTags() {
 }
 
 let doubanMovieTvCurrentSwitch = 'movie';
-let doubanCurrentTag = '热门';
+let doubanCurrentTag = '华语';
 let doubanPageStart = 0;
 const doubanPageSize = 16; // 一次显示的项目数量
 
@@ -284,7 +304,7 @@ function renderDoubanMovieTvSwitch() {
             tvToggle.classList.add('text-gray-300');
             
             doubanMovieTvCurrentSwitch = 'movie';
-            doubanCurrentTag = '热门';
+            doubanCurrentTag = '华语';
 
             // 重新加载豆瓣内容
             renderDoubanTags(movieTags);
@@ -310,7 +330,7 @@ function renderDoubanMovieTvSwitch() {
             movieToggle.classList.add('text-gray-300');
             
             doubanMovieTvCurrentSwitch = 'tv';
-            doubanCurrentTag = '热门';
+            doubanCurrentTag = '国产剧';
 
             // 重新加载豆瓣内容
             renderDoubanTags(tvTags);
