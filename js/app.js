@@ -36,10 +36,10 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // 一次性迁移：老用户默认全选，改为只选纯净源（避免继续用带广告的源）
-    if (!localStorage.getItem('pureMigrationDone_v2')) {
+    if (!localStorage.getItem('pureMigrationDone_v3')) {
         selectedAPIs = getPureSiteKeys();
         localStorage.setItem('selectedAPIs', JSON.stringify(selectedAPIs));
-        localStorage.setItem('pureMigrationDone_v2', 'true');
+        localStorage.setItem('pureMigrationDone_v3', 'true');
     }
 
     // 初始化API复选框

@@ -1,5 +1,5 @@
 const CUSTOMER_SITES = {
-    // ===== 纯净资源（默认勾选，无切片广告） =====
+    // ===== 纯净资源（默认勾选，无切片广告，响应快） =====
     lzzy: {
         api: 'https://cj.lziapi.com/api.php/provide/vod',
         name: '量子资源',
@@ -20,6 +20,36 @@ const CUSTOMER_SITES = {
         name: '无尽资源',
         pure: true
     },
+    hnzy: {
+        api: 'https://www.hongniuzy2.com/api.php/provide/vod',
+        name: '红牛资源',
+        pure: true
+    },
+    bf: {
+        api: 'https://bfzyapi.com/api.php/provide/vod',
+        name: '暴风资源',
+        pure: true
+    },
+    jyzy: {
+        api: 'https://jyzyapi.com/provide/vod',
+        name: '金鹰资源',
+        pure: true
+    },
+    hyzy: {
+        api: 'https://www.huyaapi.com/api.php/provide/vod',
+        name: '虎牙资源',
+        pure: true
+    },
+    gszy: {
+        api: 'https://api.guangsuapi.com/api.php/provide/vod',
+        name: '光速资源',
+        pure: true
+    },
+    jszyapi: {
+        api: 'https://jszyapi.com/api.php/provide/vod',
+        name: '极速资源',
+        pure: true
+    },
     // ===== 其他资源（可能含广告，默认不勾选） =====
     xl: {
         api: 'https://api.xinlangapi.com/xinlangapi.php/provide/vod',
@@ -37,17 +67,9 @@ const CUSTOMER_SITES = {
         api: 'https://api.zuidapi.com/api.php/provide/vod',
         name: '最大资源',
     },
-    bf: {
-        api: 'https://bfzyapi.com/api.php/provide/vod',
-        name: '暴风资源',
-    },
     tyyszy: {
         api: 'https://tyyszy.com/api.php/provide/vod',
         name: '天涯资源',
-    },
-    jszyapi: {
-        api: 'https://jszyapi.com/api.php/provide/vod',
-        name: '极速资源',
     },
     mdzyapi: {
         api: 'https://www.mdzyapi.com/api.php/provide/vod',
@@ -65,14 +87,6 @@ const CUSTOMER_SITES = {
         api: 'https://wwzy.tv/api.php/provide/vod',
         name: '旺旺资源',
     },
-    hnzy: {
-        api: 'https://www.hongniuzy2.com/api.php/provide/vod',
-        name: '红牛资源',
-    },
-    gszy: {
-        api: 'https://api.guangsuapi.com/api.php/provide/vod',
-        name: '光速资源',
-    },
     ikunzy: {
         api: 'https://ikunzyapi.com/api.php/provide/vod',
         name: 'iKun资源',
@@ -80,10 +94,6 @@ const CUSTOMER_SITES = {
     ykzy: {
         api: 'https://api.ukuapi.com/api.php/provide/vod',
         name: '优酷资源',
-    },
-    hyzy: {
-        api: 'https://www.huyaapi.com/api.php/provide/vod',
-        name: '虎牙资源',
     },
     xlzy: {
         api: 'http://api.xinlangapi.com/xinlangapi.php/provide/vod',
@@ -96,10 +106,6 @@ const CUSTOMER_SITES = {
     htzy: {
         api: 'https://hhzyapi.com/api.php/provide/vod',
         name: '海豚资源',
-    },
-    jyzy: {
-        api: 'https://jyzyapi.com/provide/vod',
-        name: '鲸鱼资源',
     },
     adzy: {
         api: 'https://lovedan.net/api.php/provide/vod',
