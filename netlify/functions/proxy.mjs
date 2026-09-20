@@ -140,14 +140,39 @@ async function fetchContentWithType(targetUrl, requestHeaders) {
             const err = new Error(`HTTP error ${response.status}: ${response.statusText}. URL: ${targetUrl}. Body: ${errorBody.substring(0, 200)}`);
             err.status = response.status; throw err;
         }
-        const content = await response.text();
         const contentType = response.headers.get('content-type') || '';
-        logDebug(`Fetch success: ${targetUrl}, Content-Type: ${contentType}, Length: ${content.length}`);
-        return { content, contentType, responseHeaders: response.headers };
+        logDebug(`Fetch success: ${targetUrl}, Content-Type: ${contentType}`);
+
+        // --- 关键修复：二进制内容用 arrayBuffer 读取，避免 text() 损坏图片数据 ---
+        const isBinary = isBinaryContentType(contentType, targetUrl);
+        if (isBinary) {
+            const buf = Buffer.from(await response.arrayBuffer());
+            logDebug(`Binary content, buffer length: ${buf.length}`);
+            return { content: buf, contentType, responseHeaders: response.headers, isBinary: true };
+        }
+
+        const content = await response.text();
+        logDebug(`Text content length: ${content.length}`);
+        return { content, contentType, responseHeaders: response.headers, isBinary: false };
     } catch (error) {
         logDebug(`Fetch exception for ${targetUrl}: ${error.message}`);
         throw new Error(`Failed to fetch target URL ${targetUrl}: ${error.message}`);
     }
+}
+
+function isBinaryContentType(contentType, url) {
+    const ct = (contentType || '').toLowerCase();
+    if (ct.startsWith('image/') || ct.startsWith('video/') || ct.startsWith('audio/')) return true;
+    if (ct.includes('application/octet-stream') || ct.includes('application/pdf')) return true;
+    if (ct.includes('font') || ct.includes('woff') || ct.includes('opentype') || ct.includes('truetype')) return true;
+    const urlPath = (url || '').toLowerCase().split('?')[0];
+    const binaryExts = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp', '.ico', '.svg', '.avif',
+                        '.mp4', '.webm', '.mkv', '.avi', '.mov', '.ts', '.m4a', '.mp3', '.wav', '.ogg',
+                        '.woff', '.woff2', '.ttf', '.otf', '.eot'];
+    for (const ext of binaryExts) {
+        if (urlPath.endsWith(ext)) return true;
+    }
+    return false;
 }
 
 function isM3u8Content(content, contentType) {
@@ -307,11 +332,21 @@ export const handler = async (event, context) => {
              });
             netlifyHeaders['Cache-Control'] = `public, max-age=${CACHE_TTL}`; // Set our cache policy
 
+            // 二进制内容用 base64 编码返回
+            if (isBinary) {
+                return {
+                    statusCode: 200,
+                    headers: netlifyHeaders,
+                    body: content.toString('base64'),
+                    isBase64Encoded: true,
+                };
+            }
+
             return {
                 statusCode: 200,
                 headers: netlifyHeaders,
                 body: content, // Body as string
-                // isBase64Encoded: false, // Set true only if returning binary data as base64
+                isBase64Encoded: false,
             };
         }
 

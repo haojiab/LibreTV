@@ -164,12 +164,22 @@ async function fetchContentWithType(targetUrl, requestHeaders) {
             throw err; // 抛出错误
         }
 
-        // 读取响应内容
-        const content = await response.text();
         const contentType = response.headers.get('content-type') || '';
-        logDebug(`请求成功: ${targetUrl}, Content-Type: ${contentType}, 内容长度: ${content.length}`);
-        // 返回结果
-        return { content, contentType, responseHeaders: response.headers };
+        logDebug(`请求成功: ${targetUrl}, Content-Type: ${contentType}`);
+
+        // --- 关键修复：二进制内容（图片/视频/音频等）必须用 arrayBuffer 读取，不能用 text() ---
+        // 用 text() 读取二进制数据会经过 UTF-8 解码，导致 JPEG/PNG 等图片数据被损坏（FFD8FF 头变成 ef bf bd）
+        const isBinary = isBinaryContentType(contentType, targetUrl);
+        if (isBinary) {
+            const buffer = Buffer.from(await response.arrayBuffer());
+            logDebug(`二进制内容，直接返回 Buffer，长度: ${buffer.length}`);
+            return { content: buffer, contentType, responseHeaders: response.headers, isBinary: true };
+        }
+
+        // 文本内容（m3u8/json/html 等）用 text() 读取
+        const content = await response.text();
+        logDebug(`文本内容长度: ${content.length}`);
+        return { content, contentType, responseHeaders: response.headers, isBinary: false };
 
     } catch (error) {
         // 捕获 fetch 本身的错误（网络、超时等）或上面抛出的 HTTP 错误
@@ -177,6 +187,25 @@ async function fetchContentWithType(targetUrl, requestHeaders) {
         // 重新抛出，确保包含原始错误信息
         throw new Error(`请求目标 URL 失败 ${targetUrl}: ${error.message}`);
     }
+}
+
+// 判断是否为二进制内容类型（不应经过 text() 解码）
+function isBinaryContentType(contentType, url) {
+    const ct = (contentType || '').toLowerCase();
+    // 明确的二进制类型
+    if (ct.startsWith('image/') || ct.startsWith('video/') || ct.startsWith('audio/')) return true;
+    if (ct.includes('application/octet-stream') || ct.includes('application/pdf')) return true;
+    // 字体文件
+    if (ct.includes('font') || ct.includes('woff') || ct.includes('opentype') || ct.includes('truetype')) return true;
+    // 从 URL 扩展名判断
+    const urlPath = (url || '').toLowerCase().split('?')[0];
+    const binaryExts = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp', '.ico', '.svg', '.avif',
+                        '.mp4', '.webm', '.mkv', '.avi', '.mov', '.ts', '.m4a', '.mp3', '.wav', '.ogg',
+                        '.woff', '.woff2', '.ttf', '.otf', '.eot'];
+    for (const ext of binaryExts) {
+        if (urlPath.endsWith(ext)) return true;
+    }
+    return false;
 }
 
 function isM3u8Content(content, contentType) {
@@ -446,7 +475,7 @@ export default async function handler(req, res) {
             // 设置我们自己的缓存策略
             res.setHeader('Cache-Control', `public, max-age=${CACHE_TTL}`);
 
-            // 发送原始（已解压）内容
+            // 发送原始内容（二进制 Buffer 或文本字符串）
             res.status(200).send(content);
         }
 

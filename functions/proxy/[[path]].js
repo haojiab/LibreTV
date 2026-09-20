@@ -269,11 +269,23 @@ export async function onRequest(context) {
                  throw new Error(`HTTP error ${response.status}: ${response.statusText}. URL: ${targetUrl}. Body: ${errorBody.substring(0, 150)}`);
             }
 
-            // 读取响应内容为文本
-            const content = await response.text();
+            // 读取响应内容
             const contentType = response.headers.get('Content-Type') || '';
-            logDebug(`请求成功: ${targetUrl}, Content-Type: ${contentType}, 内容长度: ${content.length}`);
-            return { content, contentType, responseHeaders: response.headers }; // 同时返回原始响应头
+            logDebug(`请求成功: ${targetUrl}, Content-Type: ${contentType}`);
+
+            // --- 关键修复：二进制内容（图片等）用 arrayBuffer 读取，不能用 text() ---
+            // text() 会把二进制数据当 UTF-8 解码，损坏 JPEG/PNG 图片数据
+            const isBinary = isBinaryContentType(contentType, targetUrl);
+            if (isBinary) {
+                const buf = await response.arrayBuffer();
+                logDebug(`二进制内容，ArrayBuffer 长度: ${buf.byteLength}`);
+                return { content: buf, contentType, responseHeaders: response.headers, isBinary: true };
+            }
+
+            // 文本内容用 text() 读取
+            const content = await response.text();
+            logDebug(`文本内容长度: ${content.length}`);
+            return { content, contentType, responseHeaders: response.headers, isBinary: false }; // 同时返回原始响应头
 
         } catch (error) {
              logDebug(`请求彻底失败: ${targetUrl}: ${error.message}`);
@@ -282,13 +294,29 @@ export async function onRequest(context) {
         }
     }
 
+    // 判断是否为二进制内容（不应经过 text() 解码）
+    function isBinaryContentType(contentType, url) {
+        const ct = (contentType || '').toLowerCase();
+        if (ct.startsWith('image/') || ct.startsWith('video/') || ct.startsWith('audio/')) return true;
+        if (ct.includes('application/octet-stream') || ct.includes('application/pdf')) return true;
+        if (ct.includes('font') || ct.includes('woff') || ct.includes('opentype') || ct.includes('truetype')) return true;
+        const urlPath = (url || '').toLowerCase().split('?')[0];
+        const binaryExts = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp', '.ico', '.svg', '.avif',
+                            '.mp4', '.webm', '.mkv', '.avi', '.mov', '.ts', '.m4a', '.mp3', '.wav', '.ogg',
+                            '.woff', '.woff2', '.ttf', '.otf', '.eot'];
+        for (const ext of binaryExts) {
+            if (urlPath.endsWith(ext)) return true;
+        }
+        return false;
+    }
+
     // 判断是否是 M3U8 内容
     function isM3u8Content(content, contentType) {
         // 检查 Content-Type
         if (contentType && (contentType.includes('application/vnd.apple.mpegurl') || contentType.includes('application/x-mpegurl') || contentType.includes('audio/mpegurl'))) {
             return true;
         }
-        // 检查内容本身是否以 #EXTM3U 开头
+        // 检查内容本身是否以 #EXTM3U 开头（二进制 ArrayBuffer 不是字符串，自动返回 false）
         return content && typeof content === 'string' && content.trim().startsWith('#EXTM3U');
     }
 
@@ -539,10 +567,10 @@ export async function onRequest(context) {
         }
 
         // --- 实际请求 ---
-        const { content, contentType, responseHeaders } = await fetchContentWithType(targetUrl);
+        const { content, contentType, responseHeaders, isBinary } = await fetchContentWithType(targetUrl);
 
-        // --- 写入缓存 (KV) ---
-        if (kvNamespace) {
+        // --- 写入缓存 (KV)：二进制内容不缓存（无法 JSON 序列化 ArrayBuffer） ---
+        if (kvNamespace && !isBinary) {
              try {
                  const headersToCache = {};
                  responseHeaders.forEach((value, key) => { headersToCache[key.toLowerCase()] = value; });
